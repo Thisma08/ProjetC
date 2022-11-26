@@ -2,5 +2,5 @@
 
 main()
 {	
-  int id;
+  //Declarations
 }
