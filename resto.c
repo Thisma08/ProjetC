@@ -26,9 +26,10 @@ typedef struct client{
 
 
 main(){
-	//déclarations
+	//dÃ©clarations
 	FILE *fmenu, *fres,*ftable,*fclient;
-	int i,n=0,idPlatero,place,choixMenu,j,nbPlaceTot=0,nbTable=0,fin=0,choixSousMenu,c=0,nbPlaceDispo=0, tableAnn;    //n = nombres de plat, c = nombre de clients
+	int i,n=0,idPlatero,place,choixMenu,j,nbPlaceTot=0,nbTable=0,fin=0,choixSousMenu,c=0,nbPlaceDispo=0, tableAnn, commandeTerminee;    //n = nombres de plat, c = nombre de clients
+	float prixComm;
 	fmenu = fopen("menu.dat","r");
 	ftable = fopen("tables.dat","r");
 	fclient = fopen("clients.dat","r");
@@ -41,14 +42,13 @@ main(){
 	cliCourant=cliDeb;
 	struct tab table[51];
 	
-	//lecture et remplissage de la liste chainée des plats
+	//lecture et remplissage de la liste chainÃ©e des plats
 	fscanf(fmenu,"%2d",&courant->idPlat);
 	while(!feof(fmenu)){
 		fscanf(fmenu,"%s %f",&courant->nomPlat,&courant->prix);
 		suivant=malloc(sizeof(plat));
 		(*courant).suivant=suivant;
-		n++; 		//Détermine le nb de plats 
-		printf("%2d %-20s %6.2f\n",courant->idPlat,courant->nomPlat,courant->prix);  //A SUPPRIMER (test)
+		n++; 		//DÃ©termine le nb de plats 
 		courant=suivant;
 		fscanf(fmenu,"%3d",&courant->idPlat);
 	}
@@ -59,6 +59,22 @@ main(){
 	}
 	(*courant).suivant=NULL;
 	free(suivant);
+	
+//	//TRI DES PLATS (A REGLER)
+//	courant=deb;
+//	for(i=1;i<=n;i++)
+//	{
+//		if(strcmp(courant->nomPlat,suivant->nomPlat)>0){
+//			strcpy(tri->nomPlat, courant->nomPlat);
+//			strcpy(courant->nomPlat, suivant->nomPlat);
+//			strcpy(suivant->nomPlat, tri->nomPlat);
+//			
+//			tri->prix = courant->prix;
+//			courant->prix = suivant->prix;
+//			suivant->prix = tri->prix;
+//		}		
+//		courant = courant->suivant;
+//	}
 	
 	//lecture des tables
 	i=1;
@@ -76,8 +92,7 @@ main(){
 		fscanf(fclient,"%s %s %d %d",&cliCourant->nom,&cliCourant->prenom,&cliCourant->numeroTable,&cliCourant->nbPersonne);
 		cliSuivant=malloc(sizeof(client));
 		(*cliCourant).cliSuivant=cliSuivant;
-		c++;                                   //Détermine le nb de clients
-		printf("%2d %-20s %-20s %2d %2d\n",cliCourant->idClient,cliCourant->nom,cliCourant->prenom,cliCourant->numeroTable,cliCourant->nbPersonne); //A SUPPRIMER (test)
+		c++;                                   //DÃ©termine le nb de clients
 		cliCourant=cliSuivant;
 		fscanf(fclient,"%d",&cliCourant->idClient);
 	}
@@ -94,7 +109,8 @@ main(){
 	while(fin==0){	
 		printf("\n1. Gestion du menu\n");
 		printf("2. Gestion des tables\n");
-		printf("3. Gestion des réservations\n");
+		printf("3. Gestion des rÃ©servations\n");
+		printf("4. Passer une commande\n");
 		printf("0. Quittez le programme\n");
 		
 		printf("\nQue voulez vous faire ?\n");
@@ -187,7 +203,7 @@ main(){
 			
 			//AFFICHAGE DE LISTE DE TABLES
 			if(choixSousMenu==1){
-				printf("Numéro de table | Nombres de places\n");
+				printf("NumÃ©ro de table | Nombres de places\n");
 				printf("-----------------------------------\n");
 				for (i=1;i<=nbTable;i++){
 					printf("             %2d |                %2d",table[i].numero,table[i].nbPlaces);
@@ -220,9 +236,9 @@ main(){
 		
 		//MENU RESERVATION
 		if(choixMenu == 3){
-			printf("\n1. Afficher les réservations\n");
-			printf("2. Réserver une table\n");
-			printf("3. Annuler une réservation\n");
+			printf("\n1. Afficher les rÃ©servations\n");
+			printf("2. RÃ©server une table\n");
+			printf("3. Annuler une rÃ©servation\n");
 			printf("0. Retour\n");
 			printf("CHOIX : ");
 			scanf("%d",&choixSousMenu);
@@ -254,14 +270,14 @@ main(){
 					cliIntercale->cliSuivant=cliDeb;
 					cliDeb=cliIntercale;
 				}
-				printf("Sous quel nom voulez vous réserver ?\n");
+				printf("Sous quel nom voulez vous rÃ©server ?\n");
 				scanf("%s",&cliIntercale->nom);
-				printf("Sous quel prénom voulez vous réserver ?\n");
+				printf("Sous quel prÃ©nom voulez vous rÃ©server ?\n");
 				scanf("%s",&cliIntercale->prenom);
 				printf("Pour combien de personnes ?\n");
 				scanf("%d",&cliIntercale->nbPersonne);
 				printf("Choississez une table parmis celles disponibles\n");
-				printf("Numéro de table | Nombres de places\n");
+				printf("NumÃ©ro de table | Nombres de places\n");
 				printf("-----------------------------------\n");
 					
 				//AFFICHE UNIQUEMENT LES TABLES NON RESERVEES ET CELLES ASSEZ GRANDES POUR LA RESERVATION
@@ -283,7 +299,7 @@ main(){
 			
 			//SUPRESSION D'UNE RESERVATION
 			if(choixSousMenu==3){
-				printf("Quel est la position du client dont vous voulez supprimer la réservation ?\n");
+				printf("Quel est la position du client dont vous voulez supprimer la rÃ©servation ?\n");
 				scanf("%d",&place);
 				if(place>=1 && place <=c){
 					if (place==1){
@@ -317,26 +333,39 @@ main(){
 			}	
 		}
 		
+		//PASSAGE D'UNE COMMANDE + CALCUL DU PRIX
+		if(choixMenu==4){
+			commandeTerminee = 0;
+			prixComm = 0;
+			while(commandeTerminee==0){
+				printf("Tapez le numero du plat commandÃ©. Si la commande est terminÃ©e, tapez \"0\".\n");
+				scanf("%2d", &place);
+				courant = deb;
+				if (place==1){
+						prixComm = deb->prix;
+				}
+				else{				
+					for(i=1;i<n;i++){
+						courant=courant->suivant;
+						if(courant->idPlat==place){
+							prixComm += courant->prix;
+						}
+					}
+				}
+				if(place==0){
+					commandeTerminee=1;
+				}						
+			}
+			printf("Le prix total de la commande est de %5.2f euros.", prixComm);
+		}
+		
 		//Quitte le programme
 		if(choixMenu==0){
 			fin=1;
 		}
 	}
 	
-//	//tri
-//	courant=deb;
-//	for(i=1;i<=n-1;i++){
-//		for(j=i+1;j<=n;j++){
-//			if (courant->nomPlat>suivant->nomPlat){
-//				tri = courant;
-//				courant = suivant;
-//				suivant = tri;
-//			}
-//		}
-//		courant = courant->suivant;
-//	}
-	
-//MISE A JOUR DES FICHIERS DE DONNEES 
+	//MISE A JOUR DES FICHIERS DE DONNEES 
 
 	//Update du fichier menu
 	fmenu = fopen("menu.dat","w");
