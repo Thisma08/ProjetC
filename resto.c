@@ -28,7 +28,8 @@ typedef struct client{
 main(){
 	//déclarations
 	FILE *fmenu, *fres,*ftable,*fclient;
-	int i,n=0,idPlatero,place,choixMenu,j,nbPlaceTot=0,nbTable=0,fin=0,choixSousMenu,c=0,nbPlaceDispo=0;    //n = nombres de plat, c = nombre de clients
+	int i,n=0,idPlatero,place,choixMenu,j,nbPlaceTot=0,nbTable=0,fin=0,choixSousMenu,c=0,nbPlaceDispo=0, tableAnn, commandeTerminee;    //n = nombres de plat, c = nombre de clients
+	float prixComm;
 	fmenu = fopen("menu.dat","r");
 	ftable = fopen("tables.dat","r");
 	fclient = fopen("clients.dat","r");
@@ -48,7 +49,6 @@ main(){
 		suivant=malloc(sizeof(plat));
 		(*courant).suivant=suivant;
 		n++; 		//Détermine le nb de plats 
-		printf("%2d %-20s %6.2f\n",courant->idPlat,courant->nomPlat,courant->prix);  //A SUPPRIMER (test)
 		courant=suivant;
 		fscanf(fmenu,"%3d",&courant->idPlat);
 	}
@@ -59,6 +59,22 @@ main(){
 	}
 	(*courant).suivant=NULL;
 	free(suivant);
+	
+//	//TRI DES PLATS (A REGLER)
+//	courant=deb;
+//	for(i=1;i<=n;i++)
+//	{
+//		if(strcmp(courant->nomPlat,suivant->nomPlat)>0){
+//			strcpy(tri->nomPlat, courant->nomPlat);
+//			strcpy(courant->nomPlat, suivant->nomPlat);
+//			strcpy(suivant->nomPlat, tri->nomPlat);
+//			
+//			tri->prix = courant->prix;
+//			courant->prix = suivant->prix;
+//			suivant->prix = tri->prix;
+//		}		
+//		courant = courant->suivant;
+//	}
 	
 	//lecture des tables
 	i=1;
@@ -77,7 +93,6 @@ main(){
 		cliSuivant=malloc(sizeof(client));
 		(*cliCourant).cliSuivant=cliSuivant;
 		c++;                                   //Détermine le nb de clients
-		printf("%2d %-20s %-20s %2d %2d\n",cliCourant->idClient,cliCourant->nom,cliCourant->prenom,cliCourant->numeroTable,cliCourant->nbPersonne); //A SUPPRIMER (test)
 		cliCourant=cliSuivant;
 		fscanf(fclient,"%d",&cliCourant->idClient);
 	}
@@ -95,6 +110,7 @@ main(){
 		printf("\n1. Gestion du menu\n");
 		printf("2. Gestion des tables\n");
 		printf("3. Gestion des réservations\n");
+		printf("4. Passer une commande\n");
 		printf("0. Quittez le programme\n");
 		
 		printf("\nQue voulez vous faire ?\n");
@@ -215,8 +231,7 @@ main(){
 					}			
 				}
 				printf("Nombre de places disponibles dans le restaurant : %3d\n",nbPlaceDispo);	
-			}
-			
+			}			
 		}
 		
 		//MENU RESERVATION
@@ -280,7 +295,68 @@ main(){
 					}
 				}
 				c++;				
+			}
+			
+			//SUPRESSION D'UNE RESERVATION
+			if(choixSousMenu==3){
+				printf("Quel est la position du client dont vous voulez supprimer la réservation ?\n");
+				scanf("%d",&place);
+				if(place>=1 && place <=c){
+					if (place==1){
+						cliIntercale=cliDeb;
+						cliDeb=cliDeb->cliSuivant;
+						free(cliIntercale);
+					}
+					else{
+						cliCourant = cliDeb;
+						for(i=1;i<place-1;i++){
+							cliCourant=cliCourant->cliSuivant;
+						}
+						if(place!=c){
+							cliIntercale=cliCourant->cliSuivant;
+							cliCourant->cliSuivant=cliIntercale->cliSuivant;
+							free(cliIntercale);
+						}
+						else{
+							cliIntercale=cliCourant->cliSuivant;
+							cliCourant->cliSuivant=NULL;
+							free(cliIntercale);
+						}
+					}
+					c--;
+				}
+				for(i=1;i<=nbTable;i++){
+					if(table[i].numero == cliIntercale->numeroTable){
+						table[i].reserve = 0;
+					}
+				}				
 			}	
+		}
+		
+		//PASSAGE D'UNE COMMANDE + CALCUL DU PRIX
+		if(choixMenu==4){
+			commandeTerminee = 0;
+			prixComm = 0;
+			while(commandeTerminee==0){
+				printf("Tapez le numero du plat commandé. Si la commande est terminée, tapez \"0\".\n");
+				scanf("%2d", &place);
+				courant = deb;
+				if (place==1){
+						prixComm = deb->prix;
+				}
+				else{				
+					for(i=1;i<n;i++){
+						courant=courant->suivant;
+						if(courant->idPlat==place){
+							prixComm += courant->prix;
+						}
+					}
+				}
+				if(place==0){
+					commandeTerminee=1;
+				}						
+			}
+			printf("Le prix total de la commande est de %5.2f euros.", prixComm);
 		}
 		
 		//Quitte le programme
@@ -289,20 +365,7 @@ main(){
 		}
 	}
 	
-//	//tri
-//	courant=deb;
-//	for(i=1;i<=n-1;i++){
-//		for(j=i+1;j<=n;j++){
-//			if (courant->nomPlat>suivant->nomPlat){
-//				tri = courant;
-//				courant = suivant;
-//				suivant = tri;
-//			}
-//		}
-//		courant = courant->suivant;
-//	}
-	
-//MISE A JOUR DES FICHIERS DE DONNEES 
+	//MISE A JOUR DES FICHIERS DE DONNEES 
 
 	//Update du fichier menu
 	fmenu = fopen("menu.dat","w");
