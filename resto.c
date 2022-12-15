@@ -28,7 +28,7 @@ typedef struct client{
 main(){
 	//déclarations
 	FILE *fmenu, *fres,*ftable,*fclient;
-	int i,n=0,idPlatero,place,choixMenu,j,nbPlaceTot=0,nbTable=0,fin=0,choixSousMenu,c=0,nbPlaceDispo=0;    //n = nombres de plat, c = nombre de clients
+	int i,n=0,idPlatero,place,choixMenu,j,nbPlaceTot=0,nbTable=0,fin=0,choixSousMenu,c=0,nbPlaceDispo=0, tableAnn;    //n = nombres de plat, c = nombre de clients
 	fmenu = fopen("menu.dat","r");
 	ftable = fopen("tables.dat","r");
 	fclient = fopen("clients.dat","r");
@@ -215,8 +215,7 @@ main(){
 					}			
 				}
 				printf("Nombre de places disponibles dans le restaurant : %3d\n",nbPlaceDispo);	
-			}
-			
+			}			
 		}
 		
 		//MENU RESERVATION
@@ -280,6 +279,41 @@ main(){
 					}
 				}
 				c++;				
+			}
+			
+			//SUPRESSION D'UNE RESERVATION
+			if(choixSousMenu==3){
+				printf("Quel est la position du client dont vous voulez supprimer la réservation ?\n");
+				scanf("%d",&place);
+				if(place>=1 && place <=c){
+					if (place==1){
+						cliIntercale=cliDeb;
+						cliDeb=cliDeb->cliSuivant;
+						free(cliIntercale);
+					}
+					else{
+						cliCourant = cliDeb;
+						for(i=1;i<place-1;i++){
+							cliCourant=cliCourant->cliSuivant;
+						}
+						if(place!=c){
+							cliIntercale=cliCourant->cliSuivant;
+							cliCourant->cliSuivant=cliIntercale->cliSuivant;
+							free(cliIntercale);
+						}
+						else{
+							cliIntercale=cliCourant->cliSuivant;
+							cliCourant->cliSuivant=NULL;
+							free(cliIntercale);
+						}
+					}
+					c--;
+				}
+				for(i=1;i<=nbTable;i++){
+					if(table[i].numero == cliIntercale->numeroTable){
+						table[i].reserve = 0;
+					}
+				}				
 			}	
 		}
 		
